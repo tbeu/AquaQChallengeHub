@@ -1,3 +1,6 @@
 [submodule "gsl"]
 	path = gsl
 	url = https://github.com/microsoft/GSL
+[submodule "infint"]
+	path = infint
+	url = https://github.com/sercantutar/infint
