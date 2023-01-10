@@ -4,3 +4,6 @@
 [submodule "infint"]
 	path = infint
 	url = https://github.com/sercantutar/infint
+[submodule "date"]
+	path = date
+	url = https://github.com/HowardHinnant/date
