@@ -47,8 +47,8 @@ Day toDay(const std::string& date)
 
 void addGame(Teams& teams, std::string name, Game&& game)
 {
-    if (teams.find(name) != teams.end()) {
-        teams[name].push_back(game);
+    if (auto it = teams.find(name); it != teams.end()) {
+        it->second.push_back(game);
     } else {
         teams[name] = Games{game};
     }
