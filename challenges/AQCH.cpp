@@ -1,1 +1,1 @@
-#include "18/challenge18.cpp"
+#include "20/challenge20.cpp"
