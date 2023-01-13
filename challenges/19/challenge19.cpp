@@ -5,6 +5,7 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <numeric>
 #include <sstream>
 #include <string>
@@ -31,6 +32,8 @@ using Map = std::vector<std::vector<bool> >;
 
 size_t simulate(Map& map, size_t round)
 {
+    std::map<Map, size_t> cache{};
+    bool foundCycle{false};
     constexpr std::array<std::array<int16_t, 2>, 4> adjs{{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}};
     const size_t dim{map.size()};
     Map next{dim, std::vector<bool>(dim, false)};
@@ -43,6 +46,15 @@ size_t simulate(Map& map, size_t round)
             }
         }
         map.swap(next);
+        if (const auto it = cache.find(map); it != cache.end()) {
+            const auto period = it->second - round;
+            const auto cycles = round / period;
+            round -= cycles * period;
+            cache.clear();
+            foundCycle = true;
+        } else if (!foundCycle) {
+            cache[map] = round;
+        }
     }
     return std::accumulate(map.cbegin() + 1, map.cend() - 1, size_t{0}, [](auto s, const auto& row) {
         return s + std::count(row.cbegin() + 1, row.cend() - 1, true);
