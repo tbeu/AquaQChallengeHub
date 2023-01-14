@@ -32,7 +32,6 @@ static bool readFile(const std::string& fileName, std::vector<std::string>& line
 struct Node;
 using NodeRef = std::shared_ptr<Node>;
 using NodeRefPair = std::pair<NodeRef, NodeRef>;
-using Table = std::map<std::string, char>;
 
 struct Node
 {
@@ -59,54 +58,44 @@ struct HuffmanTree
         for (const auto [c, w] : charCounts) {
             insert(std::make_shared<Node>(c, w));
         }
-
-        while (root.size() > 1) {
-            auto first = root[0];
-            auto second = root[1];
-            root.erase(root.begin(), root.begin() + 2);
+        while (nodes.size() > 1) {
+            auto first = nodes[0];
+            auto second = nodes[1];
+            nodes.erase(nodes.begin(), nodes.begin() + 2);
             insert(std::make_shared<Node>(std::make_pair(first, second)));
         }
-        fillTable(root[0]);
     }
 
-    Table table{};
+    std::string decode(const std::string& msg) const
+    {
+        if (nodes.empty()) {
+            return "";
+        }
+        std::weak_ptr<Node> it = nodes[0];
+        if (std::holds_alternative<char>(it.lock()->v)) {
+            return std::string(msg.size(), std::get<char>(it.lock()->v));
+        }
+        std::ostringstream oss{};
+        for (const auto c : msg) {
+            const auto& [first, second] = std::get<NodeRefPair>(it.lock()->v);
+            it = c == '0' ? first : second;
+            if (std::holds_alternative<char>(it.lock()->v)) {
+                oss << std::get<char>(it.lock()->v);
+                it = nodes[0];
+            }
+        }
+        return oss.str();
+    }
 
 private:
     void insert(NodeRef&& node)
     {
         auto cmp = [](const auto& a, const auto& b) { return a->w < b->w; };
-        root.insert(std::upper_bound(root.begin(), root.end(), node, cmp), node);
+        nodes.insert(std::upper_bound(nodes.begin(), nodes.end(), node, cmp), node);
     }
 
-    void fillTable(std::weak_ptr<Node> node, std::string key = "")
-    {
-        if (std::holds_alternative<char>(node.lock()->v)) {
-            table[key] = std::get<char>(node.lock()->v);
-            return;
-        }
-        const auto& [first, second] = std::get<NodeRefPair>(node.lock()->v);
-        fillTable(first, key + "0");
-        fillTable(second, key + "1");
-    }
-
-    std::vector<NodeRef> root{};
+    std::vector<NodeRef> nodes{};
 };
-
-std::string decode(const Table& table, const std::string& msg)
-{
-    std::ostringstream oss{};
-    size_t pos{0}, amt{1};
-    while (pos + amt <= msg.size()) {
-        if (const auto it = table.find(msg.substr(pos, amt)); it != table.end()) {
-            oss << it->second;
-            pos += amt;
-            amt = 1;
-        } else {
-            amt++;
-        }
-    }
-    return oss.str();
-}
 
 int main(int argc, char* argv[])
 {
@@ -117,7 +106,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::cout << decode(HuffmanTree{lines[0]}.table, lines[1]) << std::endl;
+    std::cout << HuffmanTree{lines[0]}.decode(lines[1]) << std::endl;
 
     return EXIT_SUCCESS;
 }
