@@ -1,1 +1,1 @@
-#include "30/challenge30.cpp"
+#include "32/challenge32.cpp"
