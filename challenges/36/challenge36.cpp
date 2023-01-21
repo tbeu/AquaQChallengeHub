@@ -42,15 +42,13 @@ Grid toArray(std::string& line)
             c = '0';
         }
     });
-    Grid a;
+    Grid grid;
     std::istringstream iss{line};
     iss.ignore(2);
-    int val;
     for (size_t i = 0; i < 16; ++i) {
-        iss >> val;
-        a[i] = val;
+        iss >> grid[i];
     }
-    return a;
+    return grid;
 }
 
 bool isSolution(const Grid& grid, const Grid& input, const Pairs& guess)
@@ -208,7 +206,7 @@ int main(int argc, char* argv[])
     }
 
     // Precalculate the potential factorizations
-    std::map<int, Pairs> factors{};
+    std::map<int, Pairs> factorizations{};
     for (int i = 1; i <= 400; ++i) {
         Pairs pairs{};
         for (int j = 1; j <= static_cast<int>(sqrt(i)); ++j) {
@@ -216,7 +214,7 @@ int main(int argc, char* argv[])
                 pairs.push_back({j, i / j});
             }
         }
-        factors[i] = pairs;
+        factorizations[i] = pairs;
     }
 
     size_t sum{};
@@ -231,12 +229,11 @@ int main(int argc, char* argv[])
         // Determine the potential pairs given the grid and the input
         Pairs potential{};
         for (const auto n : grid) {
-            const auto& allMuls = factors[n];
-            for (const auto& mul : allMuls) {
-                if (std::find(grid.cbegin(), grid.cend(), mul.first + mul.second) != grid.end()) {
-                    if (!insertInput(input, mul.first).empty() && !insertInput(input, mul.second).empty()) {
-                        potential.push_back(mul);
-                    }
+            const auto& factors = factorizations[n];
+            for (const auto& f : factors) {
+                if (std::find(grid.cbegin(), grid.cend(), f.first + f.second) != grid.end() &&
+                    !insertInput(input, f.first).empty() && !insertInput(input, f.second).empty()) {
+                    potential.push_back(f);
                 }
             }
         }
