@@ -10,3 +10,6 @@
 [submodule "constexpr-hash-map"]
 	path = constexpr-hash-map
 	url = https://github.com/karel-burda/constexpr-hash-map
+[submodule "Tbl"]
+	path = Tbl
+	url = https://github.com/JamesBoer/Tbl
