@@ -27,8 +27,7 @@ static bool readFile(const std::string& fileName, std::vector<std::string>& line
     return true;
 }
 
-using Row = std::array<uint8_t, 3>;
-using Face = std::array<Row, 3>;
+using Face = std::array<std::array<uint8_t, 3>, 3>;
 using RotateFunction = std::function<void(void)>;
 
 Face F{{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}}};
@@ -52,60 +51,60 @@ inline void rotateFace(Face& f)
 void rotateF()
 {
     rotateFace(F);
-    const auto tmp{D[0]};
     for (size_t i = 0; i < 3; ++i) {
+        const auto tmp{D[0][i]};
         D[0][i] = R[2 - i][0];
         R[2 - i][0] = U[2][2 - i];
         U[2][2 - i] = L[i][2];
-        L[i][2] = tmp[i];
+        L[i][2] = tmp;
     }
 }
 
 void rotateU()
 {
     rotateFace(U);
-    const auto tmp{F[0]};
     for (size_t i = 0; i < 3; ++i) {
+        const auto tmp{F[0][i]};
         F[0][i] = R[0][i];
         R[0][i] = B[2][2 - i];
         B[2][2 - i] = L[0][i];
-        L[0][i] = tmp[i];
+        L[0][i] = tmp;
     }
 }
 
 void rotateL()
 {
     rotateFace(L);
-    const Row tmp{D[2][0], D[1][0], D[0][0]};
     for (size_t i = 0; i < 3; ++i) {
+        const auto tmp{D[2 - i][0]};
         D[2 - i][0] = F[2 - i][0];
         F[2 - i][0] = U[2 - i][0];
         U[2 - i][0] = B[2 - i][0];
-        B[2 - i][0] = tmp[i];
+        B[2 - i][0] = tmp;
     }
 }
 
 void rotateR()
 {
     rotateFace(R);
-    const Row tmp{D[0][2], D[1][2], D[2][2]};
     for (size_t i = 0; i < 3; ++i) {
+        const auto tmp{D[i][2]};
         D[i][2] = B[i][2];
         B[i][2] = U[i][2];
         U[i][2] = F[i][2];
-        F[i][2] = tmp[i];
+        F[i][2] = tmp;
     }
 }
 
 void rotateD()
 {
     rotateFace(D);
-    const auto tmp{B[0]};
     for (size_t i = 0; i < 3; ++i) {
+        const auto tmp{B[0][i]};
         B[0][i] = R[2][2 - i];
         R[2][2 - i] = F[2][2 - i];
         F[2][2 - i] = L[2][2 - i];
-        L[2][2 - i] = tmp[i];
+        L[2][2 - i] = tmp;
     }
 }
 
