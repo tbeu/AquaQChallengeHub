@@ -30,10 +30,10 @@ static bool readFile(const std::string& fileName, std::vector<std::string>& line
 }
 
 constexpr bool verbose{true};
-using Grid = std::array<int, 16>;
-using Grids = std::vector<Grid>;
-using Pair = std::pair<int, int>;
+using Grid = std::array<uint16_t, 16>;
+using Pair = std::pair<uint16_t, uint16_t>;
 using Pairs = std::vector<Pair>;
+using OccMap = std::map<uint16_t, uint8_t>;
 
 Grid toArray(std::string& line)
 {
@@ -45,64 +45,48 @@ Grid toArray(std::string& line)
     Grid grid;
     std::istringstream iss{line};
     iss.ignore(2);
-    for (size_t i = 0; i < 16; ++i) {
+    for (size_t i = 0; i < grid.size(); ++i) {
         iss >> grid[i];
     }
     return grid;
 }
 
-bool isSolution(const Grid& grid, const Grid& input, const Pairs& guess)
+OccMap toOccMap(const Grid& grid)
+{
+    OccMap occ;
+    for (const auto n : grid) {
+        if (auto it = occ.find(n); it != occ.end()) {
+            it->second++;
+        } else {
+            occ[n] = 1;
+        }
+    }
+    return occ;
+}
+
+bool isSolution(const OccMap& gridOcc, const Grid& input, const Pairs& guess)
 {
     if (guess.size() != 8) {
         return false;
     }
 
-    std::array<bool, 16> testGrid{};
-    std::array<bool, 16> testInput{};
-    for (const auto& [first, second] : guess) {
-        for (size_t i = 0; i < grid.size(); ++i) {
-            bool found{false};
-            if (first + second == grid[i]) {
-                for (size_t j = 0; j < grid.size(); ++j) {
-                    if (first * second == grid[j] && !testGrid[i] && !testGrid[j] && i != j) {
-                        testGrid[i] = true;
-                        testGrid[j] = true;
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            if (!found) {
-                continue;
-            }
-            size_t iFirst = 16;
-            for (size_t j = 0; j < input.size(); ++j) {
-                if (first == input[j] && !testInput[j]) {
-                    iFirst = j;
-                    break;
-                }
-            }
-            if (iFirst == 16) {
-                continue;
-            }
-            for (size_t j = 0; j < input.size(); ++j) {
-                if (second == input[j] && !testInput[j] && j != iFirst) {
-                    testInput[iFirst] = true;
-                    testInput[j] = true;
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                break;
-            }
-        }
+    Grid guessGrid{};
+    for (size_t i = 0; i < 8; ++i) {
+        guessGrid[2 * i] = guess[i].first + guess[i].second;
+        guessGrid[2 * i + 1] = guess[i].first * guess[i].second;
     }
-    return std::all_of(testGrid.cbegin(), testGrid.cend(), [](const auto b) { return b; }) &&
-           std::all_of(testInput.cbegin(), testInput.cend(), [](const auto b) { return b; });
+    if (toOccMap(guessGrid) != gridOcc) {
+        return false;
+    }
+
+    for (size_t i = 0; i < 8; ++i) {
+        guessGrid[2 * i] = guess[i].first;
+        guessGrid[2 * i + 1] = guess[i].second;
+    }
+    return toOccMap(guessGrid) == toOccMap(input);
 }
 
-std::set<Grid> insertInput(const Grid& input, int n)
+std::set<Grid> insertInput(const Grid& input, uint16_t n)
 {
     std::set<Grid> inputs{};
     size_t imin{0};
@@ -147,10 +131,10 @@ void print(const Pairs& pairs)
     std::cout << std::endl;
 }
 
-size_t solve(const Grid& grid, const Grid& input, const Pairs& potential, const Pairs& guess,
+size_t solve(const OccMap& gridOcc, const Grid& input, const Pairs& potential, const Pairs& guess,
              std::set<std::pair<Grid, Pairs> >& visitor, size_t start = 0)
 {
-    if (isSolution(grid, input, guess)) {
+    if (isSolution(gridOcc, input, guess)) {
         if (verbose) {
             print(input, "i:");
             print(guess);
@@ -180,7 +164,7 @@ size_t solve(const Grid& grid, const Grid& input, const Pairs& potential, const 
                 if (visitor.find({nextInput, nextGuess}) != visitor.end()) {
                     continue;
                 }
-                if (const auto sum = solve(grid, nextInput, potential, nextGuess, visitor, i + 1); sum > 0) {
+                if (const auto sum = solve(gridOcc, nextInput, potential, nextGuess, visitor, i + 1); sum > 0) {
                     return sum;
                 }
             }
@@ -193,7 +177,7 @@ size_t solve(const Grid& grid, const Grid& input, const Pairs& potential)
 {
     Pairs guess{};
     std::set<std::pair<Grid, Pairs> > visitor{};
-    return solve(grid, input, potential, guess, visitor);
+    return solve(toOccMap(grid), input, potential, guess, visitor);
 }
 
 int main(int argc, char* argv[])
@@ -206,10 +190,10 @@ int main(int argc, char* argv[])
     }
 
     // Precalculate the potential factorizations
-    std::map<int, Pairs> factorizations{};
-    for (int i = 1; i <= 400; ++i) {
-        Pairs pairs{};
-        for (int j = 1; j <= static_cast<int>(sqrt(i)); ++j) {
+    std::map<uint16_t, Pairs> factorizations{};
+    for (uint16_t i = 1; i <= 400; ++i) {
+        Pairs pairs{{{1, i}}};
+        for (uint16_t j = 2; j <= static_cast<uint16_t>(sqrt(i)); ++j) {
             if (i % j == 0) {
                 pairs.push_back({j, i / j});
             }
