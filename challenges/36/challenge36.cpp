@@ -35,6 +35,26 @@ using Pair = std::pair<uint16_t, uint16_t>;
 using Pairs = std::vector<Pair>;
 using OccMap = std::map<uint16_t, uint8_t>;
 
+std::ostream& operator<<(std::ostream& stream, const Grid& grid)
+{
+    std::string sep{""};
+    for (const auto n : grid) {
+        stream << sep << n;
+        sep = " ";
+    }
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, const Pairs& pairs)
+{
+    std::string sep{""};
+    for (const auto [first, second] : pairs) {
+        stream << sep << "(" << first << "," << second << ")";
+        sep = ", ";
+    }
+    return stream;
+}
+
 Grid toArray(std::string& line)
 {
     std::for_each(line.begin(), line.end(), [](auto& c) {
@@ -111,35 +131,13 @@ std::set<Grid> insertInput(const Grid& input, uint16_t n)
     return inputs;
 }
 
-void print(const Grid& grid, const std::string& prefix)
-{
-    std::string sep{prefix};
-    for (const auto n : grid) {
-        std::cout << sep << n;
-        sep = " ";
-    }
-    std::cout << std::endl;
-}
-
-void print(const Pairs& pairs)
-{
-    std::string sep{""};
-    for (const auto [first, second] : pairs) {
-        std::cout << sep << "(" << first << "," << second << ")";
-        sep = ", ";
-    }
-    std::cout << std::endl;
-}
-
 size_t solve(const OccMap& gridOcc, const Grid& input, const Pairs& potential, const Pairs& guess,
              std::set<std::pair<Grid, Pairs> >& visitor, size_t start = 0)
 {
     if (isSolution(gridOcc, input, guess)) {
         if (verbose) {
-            print(input, "i:");
-            print(guess);
+            std::cout << "i:" << input << '\n' << guess << std::endl;
         }
-
         size_t sum{};
         for (const auto [first, second] : guess) {
             sum += std::abs(first - second);
@@ -206,10 +204,6 @@ int main(int argc, char* argv[])
         const auto grid = toArray(lines[i]);
         const auto input = toArray(lines[i + 1]);
 
-        if (verbose) {
-            print(grid, "g:");
-        }
-
         // Determine the potential pairs given the grid and the input
         Pairs potential{};
         for (const auto n : grid) {
@@ -220,6 +214,10 @@ int main(int argc, char* argv[])
                     potential.push_back(f);
                 }
             }
+        }
+
+        if (verbose) {
+            std::cout << "g:" << grid << std::endl;
         }
 
         if (potential.size() < 8) {
