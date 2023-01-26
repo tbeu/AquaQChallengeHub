@@ -34,34 +34,29 @@ constexpr size_t someMax{100};
 using Tile = uint32_t;
 using Row = std::vector<Tile>;
 using Floor = std::vector<Row>;
-using Pos = std::array<size_t, 2>;
 
 size_t dijkstra(const Floor& floor)
 {
+    using Pos = std::array<size_t, 2>;
+    using Pair = std::pair<size_t, Pos>;
     std::map<Pos, size_t> visited{};
-    auto cmp = [&visited](const auto& a, const auto& b) { return visited[a] > visited[b]; };
-    std::priority_queue<Pos, std::vector<Pos>, decltype(cmp)> q(cmp);
+    std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair> > q{};
     auto pushQ = [&](const Pos& next, size_t sumOld = 0) {
         size_t sum{sumOld};
         for (size_t i = 0; i < width; ++i) {
             sum += someMax - floor[next[0]][next[1] + i];
         }
-        if (auto it = visited.find(next); it != visited.end()) {
-            if (sum < it->second) {
-                it->second = sum;
-                q.push(next);
-            }
-        } else {
+        if (auto it = visited.find(next); it == visited.end() || sum < it->second) {
             visited[next] = sum;
-            q.push(next);
+            q.push({sum, next});
         }
     };
     for (size_t i = 0; i <= floor[0].size() - width; ++i) {
         pushQ({0, i});
     }
     while (!q.empty()) {
-        auto pos = q.top();
-        const auto sum = visited[pos];
+        const auto sum = q.top().first;
+        auto pos = q.top().second;
         if (++pos[0] == floor.size()) {
             return someMax * width * floor.size() - sum;
         }

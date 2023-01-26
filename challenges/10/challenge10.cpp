@@ -42,29 +42,25 @@ struct Graph
 
 Graph<std::string> g{};
 
-uint32_t dijkstra(const std::string start, const std::string end)
+uint32_t dijkstra(const std::string& start, const std::string& end)
 {
-    std::map<std::string, uint32_t> visited{};
-    auto cmp = [&visited](const auto& a, const auto& b) { return visited[a] > visited[b]; };
-    std::priority_queue<std::string, std::vector<std::string>, decltype(cmp)> q(cmp);
-    q.push(start);
-    visited[start] = 0;
+    std::map<std::string, uint32_t> costs{};
+    using Pair = std::pair<uint32_t, std::string>;
+    std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair> > q{};
+    q.push({0, start});
+    costs[start] = 0;
     while (!q.empty()) {
-        const auto node = q.top();
+        const auto [c, node] = q.top();
         if (node == end) {
-            break;
+            return c;
         }
         q.pop();
-        const auto cOld = visited[node];
-        for (const auto& [next, c] : g.adjs[node]) {
-            if (auto it = visited.find(next); it == visited.end() || cOld + c < it->second) {
-                visited[next] = cOld + c;
-                q.push(next);
+        for (const auto& [next, cNext] : g.adjs[node]) {
+            if (auto it = costs.find(next); it == costs.end() || c + cNext < it->second) {
+                costs[next] = c + cNext;
+                q.push({c + cNext, next});
             }
         }
-    }
-    if (auto it = visited.find(end); it != visited.end()) {
-        return it->second;
     }
     return UINT32_MAX;
 }
