@@ -9,6 +9,7 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <gsl/util>
@@ -28,20 +29,18 @@ static bool readFile(const std::string& fileName, std::vector<std::string>& line
     return true;
 }
 
-using Dst = std::pair<std::string, uint32_t>;
-using Dsts = std::set<Dst>;
-using Graph = std::map<std::string, Dsts>;
-
-Graph g{};
-
-void addEdge(const std::string s, const std::string d, uint32_t c)
+template <typename T>
+struct Graph
 {
-    if (auto it = g.find(s); it != g.end()) {
-        it->second.insert({d, c});
-    } else {
-        g[s] = Dsts{{d, c}};
+    void addEdge(const T& s, const T& d, uint32_t c)
+    {
+        adjs[s].insert({d, c});
     }
-}
+
+    std::unordered_map<T, std::set<std::pair<T, uint32_t> > > adjs{};
+};
+
+Graph<std::string> g{};
 
 uint32_t dijkstra(const std::string start, const std::string end)
 {
@@ -57,7 +56,7 @@ uint32_t dijkstra(const std::string start, const std::string end)
         }
         q.pop();
         const auto cOld = visited[node];
-        for (const auto& [next, c] : g[node]) {
+        for (const auto& [next, c] : g.adjs[node]) {
             if (auto it = visited.find(next); it == visited.end() || cOld + c < it->second) {
                 visited[next] = cOld + c;
                 q.push(next);
@@ -86,8 +85,8 @@ int main(int argc, char* argv[])
         const auto pos2 = line.find(',', pos1 + 1);
         const auto d = line.substr(pos1 + 1, pos2 - pos1 - 1);
         const auto c = static_cast<uint32_t>(std::stoi(line.substr(pos2 + 1, line.size() - pos2)));
-        addEdge(s, d, c);
-        addEdge(d, s, c);
+        g.addEdge(s, d, c);
+        g.addEdge(d, s, c);
     }
 
     std::cout << dijkstra("TUPAC", "DIDDY") << std::endl;
