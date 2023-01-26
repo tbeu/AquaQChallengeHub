@@ -43,3 +43,4 @@ C++17 solutions of the [AquaQ Challenge Hub](https://challenges.aquaq.co.uk)
 | [36](https://challenges.aquaq.co.uk/challenge/36) | Tetonor Terror              | [challenge36.cpp](challenges/36/challenge36.cpp) |
 | [37](https://challenges.aquaq.co.uk/challenge/37) | GUESS WORDS                 | [challenge37.cpp](challenges/37/challenge37.cpp) |
 | [38](https://challenges.aquaq.co.uk/challenge/38) | Number Neighbours           | [challenge38.cpp](challenges/38/challenge38.cpp) |
+| [39](https://challenges.aquaq.co.uk/challenge/39) | Game of Throwns             | [challenge39.cpp](challenges/39/challenge39.cpp) |
