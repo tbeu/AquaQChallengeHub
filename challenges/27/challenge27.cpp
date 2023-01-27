@@ -95,6 +95,11 @@ int main(int argc, char* argv[])
             yieldLetter();
             r += rr;
             c += cc;
+            // Check for tail
+            if (headOrTails.find({r, c}) != headOrTails.end()) {
+                yieldWord();
+                break;
+            }
             // Check for word boundaries
             if (lines[r + !rr][c + !cc] != ' ') {
                 rr = !rr;
@@ -105,8 +110,7 @@ int main(int argc, char* argv[])
                 cc = -!cc;
                 yieldWord();
             }
-        } while (headOrTails.find({r, c}) == headOrTails.end());
-        yieldWord();
+        } while (true);
         // Delete head and tail positions from snake
         headOrTails.erase(headOrTails.begin());
         headOrTails.erase({r, c});
