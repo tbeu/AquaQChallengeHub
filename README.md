@@ -44,3 +44,4 @@ C++17 solutions of the [AquaQ Challenge Hub](https://challenges.aquaq.co.uk)
 | [37](https://challenges.aquaq.co.uk/challenge/37) | GUESS WORDS                 | [challenge37.cpp](challenges/37/challenge37.cpp) |
 | [38](https://challenges.aquaq.co.uk/challenge/38) | Number Neighbours           | [challenge38.cpp](challenges/38/challenge38.cpp) |
 | [39](https://challenges.aquaq.co.uk/challenge/39) | Game of Throwns             | [challenge39.cpp](challenges/39/challenge39.cpp) |
+| [40](https://challenges.aquaq.co.uk/challenge/40) | Prominence promenade        | [challenge40.cpp](challenges/40/challenge40.cpp) |
