@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iostream>
 #include <numeric>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -38,18 +37,17 @@ int main(int argc, char* argv[])
     uint16_t wins{};
     uint16_t sum{};
     uint16_t aces{};
-    std::istringstream iss{lines[0]};
-    char card;
-    auto reset = [&sum, &aces]() {
+    const auto reset = [&sum, &aces] {
         sum = 0;
         aces = 0;
     };
-    while (iss >> card) {
+    for (size_t i = 0; i < lines[0].size(); i += 2) {
+        const auto card = lines[0][i];
         if (card == 'J' || card == 'Q' || card == 'K') {
             sum += 10;
         } else if (card == '1') {
             sum += 10;
-            iss.ignore(1);
+            ++i;
         } else if (card == 'A') {
             sum++;
             aces++;
